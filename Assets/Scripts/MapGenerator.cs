@@ -6,17 +6,17 @@ using System.Threading;
 
 public class MapGenerator : MonoBehaviour
 {
-    public enum DrawMode { NoiseMap, ColorMap, Mesh};
+    public enum DrawMode { NoiseMap, ColorMap, Mesh };
     public DrawMode drawMode;
 
     public const int mapChunkSize = 241;    //241-1 have many factors 
-    [Range(0,6)]
-    public int levelOfDetail;
+    [Range(0, 6)]
+    public int editorPreviewLOD;
     public float noiseScale;
 
     public int seed;
     public int octaves;
-    [Range(0,1)]
+    [Range(0, 1)]
     public float persistance;
     public float lacunarity;
     public Vector2 offset;
@@ -33,7 +33,7 @@ public class MapGenerator : MonoBehaviour
 
     public void DrawMapInEditor()
     {
-        MapData mapData = GenerateMapData();
+        MapData mapData = GenerateMapData(Vector2.zero);
         MapDisplay display = FindObjectOfType<MapDisplay>();
 
         if (drawMode == DrawMode.NoiseMap)
@@ -46,33 +46,34 @@ public class MapGenerator : MonoBehaviour
         }
         else if (drawMode == DrawMode.Mesh)
         {
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail), TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
+            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD), TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
         }
     }
 
-    public void RequestMapData(Action<MapData> callback)    //Action是UnityEngine.Events命名空间中定义的一种委托类型(delegate)，它可以实现不带参数和返回值的方法
+    public void RequestMapData(Vector2 centre, Action<MapData> callback)    //Action是UnityEngine.Events命名空间中定义的一种委托类型(delegate)，它可以实现不带参数和返回值的方法
     {
-        ThreadStart threadStart = delegate { MapDataThread(callback); };   //ThreadStart: the entrance of a thread
+        ThreadStart threadStart = delegate { MapDataThread(centre, callback); };   //ThreadStart: the entrance of a thread
         new Thread(threadStart).Start();
-    } 
+    }
 
-    void MapDataThread(Action<MapData> callback)
+    void MapDataThread(Vector2 centre, Action<MapData> callback)
     {
-        MapData mapData = GenerateMapData();
+        MapData mapData = GenerateMapData(centre);
         lock (mapDataThreadInfoQueue)   //when one thread reaches this point, excute code in{}, no other code can excute as well
         {
             mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData));  //Enqueue是一个队列的入队函数,可以在队尾添加一个元素
         }
     }
 
-    public void RequestMeshData(MapData mapData, Action<MeshData> callback)
+    public void RequestMeshData(MapData mapData, int lod, Action<MeshData> callback)
     {
-
+        ThreadStart threadStart = delegate { MeshDataThread(mapData, lod, callback); };
+        new Thread(threadStart).Start();
     }
 
-    void MeshDataThreat(MapData mapData, Action<MeshData> callback)
+    void MeshDataThread(MapData mapData, int lod, Action<MeshData> callback)
     {
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, lod);
         lock (meshDataThreadInfoQueue)
         {
             meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
@@ -83,7 +84,7 @@ public class MapGenerator : MonoBehaviour
     {
         if (mapDataThreadInfoQueue.Count > 0)
         {
-            for(int i = 0; i < mapDataThreadInfoQueue.Count; i++)
+            for (int i = 0; i < mapDataThreadInfoQueue.Count; i++)
             {
                 MapThreadInfo<MapData> threadInfo = mapDataThreadInfoQueue.Dequeue();
                 threadInfo.callback(threadInfo.parameter);
@@ -92,7 +93,7 @@ public class MapGenerator : MonoBehaviour
 
         if (meshDataThreadInfoQueue.Count > 0)
         {
-            for(int i = 0; i < meshDataThreadInfoQueue.Count; i++)
+            for (int i = 0; i < meshDataThreadInfoQueue.Count; i++)
             {
                 MapThreadInfo<MeshData> threadInfo = meshDataThreadInfoQueue.Dequeue();
                 threadInfo.callback(threadInfo.parameter);
@@ -100,20 +101,20 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    MapData GenerateMapData()
+    MapData GenerateMapData(Vector2 centre)
     {
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, centre + offset);
 
         Color[] colorMap = new Color[mapChunkSize * mapChunkSize];
 
-        for(int y = 0; y < mapChunkSize; y++)
+        for (int y = 0; y < mapChunkSize; y++)
         {
-            for(int x = 0; x < mapChunkSize; x++)
+            for (int x = 0; x < mapChunkSize; x++)
             {
                 float currentHeight = noiseMap[x, y];
-                for(int i = 0; i < regions.Length; i++)
+                for (int i = 0; i < regions.Length; i++)
                 {
-                    if(currentHeight <= regions[i].height)
+                    if (currentHeight <= regions[i].height)
                     {
                         colorMap[y * mapChunkSize + x] = regions[i].color;
                         break;
@@ -144,25 +145,25 @@ public class MapGenerator : MonoBehaviour
             this.parameter = parameter;
         }
     }
-  
 
-    [System.Serializable]
-    public struct TerrainType
+}
+
+[System.Serializable]
+public struct TerrainType
+{
+    public string name;
+    public float height;
+    public Color color;
+}
+
+public struct MapData
+{
+    public readonly float[,] heightMap;
+    public readonly Color[] colorMap;
+
+    public MapData(float[,] heightMap, Color[] colorMap)    //使用鼠标右键快速重构
     {
-        public string name;
-        public float height;
-        public Color color;
-    }
-
-    public struct MapData
-    {
-        public readonly float[,] heightMap;
-        public readonly Color[] colorMap;
-
-        public MapData(float[,] heightMap, Color[] colorMap)    //使用鼠标右键快速重构
-        {
-            this.heightMap = heightMap;
-            this.colorMap = colorMap;
-        }
+        this.heightMap = heightMap;
+        this.colorMap = colorMap;
     }
 }

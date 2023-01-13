@@ -7,25 +7,50 @@ public static class MeshGenerator
     public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail)
     {
         AnimationCurve heightCurve = new AnimationCurve(_heightCurve.keys);
-        int width = heightMap.GetLength(0);
-        int height = heightMap.GetLength(1);
-        float topLeftX = (width - 1) / -2f;  //to right
-        float topLeftZ = (height - 1) / 2f;  //to down
+        int borderedSize = heightMap.GetLength(0);  //为了计算size最边上的顶点的法线，需要在边界再扩充size
+        int meshSize = borderedSize - 2;
+        float topLeftX = (meshSize - 1) / -2f;  //to right
+        float topLeftZ = (meshSize - 1) / 2f;  //to down
 
         int meshSimplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
-        int verticesPerLine = (width - 1) / meshSimplificationIncrement + 1;
+        int verticesPerLine = (meshSize - 1) / meshSimplificationIncrement + 1;
 
         MeshData meshData = new MeshData(verticesPerLine, verticesPerLine);
-        int vertexIndex = 0;
 
-        for (int y = 0; y < height; y += meshSimplificationIncrement)
+        int[,] vertexIndicesMap = new int[borderedSize, borderedSize];
+        int meshVertexIndex = 0;
+        int borderVertexIndex = -1;
+
+        for (int y = 0; y < borderedSize; y += meshSimplificationIncrement)
         {
-            for (int x = 0; x < width; x += meshSimplificationIncrement)
+            for (int x = 0; x < borderedSize; x += meshSimplificationIncrement)
             {
-                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightCurve.Evaluate(heightMap[x,y]) * heightMultiplier, topLeftZ - y);
-                meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
+                bool isBorderVertex = y == 0 || y == borderedSize - 1 || x == 0 || x == borderedSize - 1;      //最下、最上、最左、最右
 
-                if (x < width - 1 && y < height - 1)
+                if (isBorderVertex)
+                {
+                    vertexIndicesMap[x, y] = borderVertexIndex;
+                    borderVertexIndex--;
+                }
+                else
+                {
+                    vertexIndicesMap[x, y] = meshVertexIndex;
+                    meshVertexIndex++;
+                }
+            }
+        }
+
+        for (int y = 0; y < borderedSize; y += meshSimplificationIncrement)
+        {
+            for (int x = 0; x < borderedSize; x += meshSimplificationIncrement)
+            {
+                int vertexIndex = vertexIndicesMap[x,y];
+                Vector2 percent = new Vector2((x - meshSimplificationIncrement) / (float)meshSize, (y - meshSimplificationIncrement) / (float)meshSize);  //former: meshData.uvs[vertexIndex]
+                float height = heightCurve.Evaluate(heightMap[x, y]) * heightMultiplier;
+                Vector3 vertexPosition = new Vector3(topLeftX + percent.x * meshSize, height, topLeftZ - percent.y * meshSize);  //former:meshData.vertices[vertexIndex]
+               
+
+                if (x < borderedSize - 1 && y < borderedSize - 1)
                 {
                     meshData.AddTriangle(vertexIndex, vertexIndex + verticesPerLine + 1, vertexIndex + verticesPerLine);
                     meshData.AddTriangle(vertexIndex + verticesPerLine + 1, vertexIndex, vertexIndex + 1);
@@ -64,13 +89,49 @@ public class MeshData
 
     }
 
+    Vector3[] CalculateNormals()    //解决法线锯齿问题
+    {
+        Vector3[] vertexNormals = new Vector3[vertices.Length];
+        int triangleCount = triangles.Length / 3;
+        for(int i = 0; i < triangleCount; i++)
+        {
+            int normalTriangleIndex = i * 3;
+            int vertexIndexA = triangles[normalTriangleIndex];
+            int vertexIndexB = triangles[normalTriangleIndex + 1];
+            int vertexIndexC = triangles[normalTriangleIndex + 2];
+
+            Vector3 triangleNormal = SurfacecNormalFromIndices(vertexIndexA, vertexIndexB, vertexIndexC);
+            vertexNormals[vertexIndexA] += triangleNormal;
+            vertexNormals[vertexIndexB] += triangleNormal;
+            vertexNormals[vertexIndexC] += triangleNormal;
+        }
+
+        for(int i = 0; i < vertexNormals.Length; i++)
+        {
+            vertexNormals[i].Normalize();
+        }
+
+        return vertexNormals;
+    }
+
+    Vector3 SurfacecNormalFromIndices(int indexA, int indexB, int indexC)   //根据顶点求三角形法线
+    {
+        Vector3 pointA = vertices[indexA];
+        Vector3 pointB = vertices[indexB];
+        Vector3 pointC = vertices[indexC];
+
+        Vector3 sideAB = pointB - pointA;
+        Vector3 sideAC = pointC - pointA;
+        return Vector3.Cross(sideAC, sideAB).normalized;    //两向量的叉积垂直于它们
+    }
     public Mesh CreateMesh()
     {
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.uv = uvs;
-        mesh.RecalculateNormals();  //Recalculates the normals of the Mesh from the triangles and vertices
+        //mesh.RecalculateNormals();  //Recalculates the normals of the Mesh from the triangles and vertices
+        mesh.normals = CalculateNormals();
         return mesh;
     }
 }

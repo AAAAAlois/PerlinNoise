@@ -18,14 +18,17 @@ public class MapGenerator : MonoBehaviour
 	public float noiseScale;
 
 	public int seed;
+	[Range(1, 8)]
 	public int octaves;
 	[Range(0, 1)]
 	public float persistance;
+	[Range(1, 10)]
 	public float lacunarity;
 	public Vector2 offset;
 
 	public bool useFalloff;
 
+	[Range(1, 100)]
 	public float meshHeightMultiplier;
 	public AnimationCurve meshHeightCurve;  //water has no height change
 

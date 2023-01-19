@@ -38,6 +38,11 @@ public class MapGenerator : MonoBehaviour
 
 	float[,] falloffMap;
 
+	[HideInInspector] public int lastFrameOctaves;
+	[HideInInspector] public float lastFramePersistance;
+	[HideInInspector] public float lastFrameLacunarity;
+	[HideInInspector] public float lastFrameHeightMultiplier;
+
 	Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
@@ -46,7 +51,15 @@ public class MapGenerator : MonoBehaviour
 		//falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize+2);
 	}
 
-	public void DrawMapInEditor()
+    private void Start()
+    {
+		lastFrameOctaves = octaves;
+		lastFramePersistance = persistance;
+		lastFrameLacunarity = lacunarity;
+		lastFrameHeightMultiplier = meshHeightMultiplier;
+    }
+
+    public void DrawMapInEditor()
 	{
 		MapData mapData = GenerateMapData(Vector2.zero);
 
@@ -122,6 +135,8 @@ public class MapGenerator : MonoBehaviour
 				threadInfo.callback(threadInfo.parameter);
 			}
 		}
+
+        
 	}
 
 	MapData GenerateMapData(Vector2 centre)

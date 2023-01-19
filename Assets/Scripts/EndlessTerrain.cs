@@ -46,10 +46,16 @@ public class EndlessTerrain : MonoBehaviour
             viewerPositionOld = viewerPosition;
             UpdateVisibleChunks();
         }
-        
+
+        if (mapGenerator.lastFrameOctaves != mapGenerator.octaves || mapGenerator.lastFramePersistance != mapGenerator.persistance || mapGenerator.lastFrameLacunarity != mapGenerator.lacunarity || mapGenerator.lastFrameHeightMultiplier != mapGenerator.meshHeightMultiplier)
+        {
+            Debug.Log("update chunks");
+            UpdateVisibleChunks();
+        }
+
     }
 
-    void UpdateVisibleChunks()
+    public void UpdateVisibleChunks()
     {
         for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++)
         {

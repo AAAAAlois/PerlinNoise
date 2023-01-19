@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class FallOffGenerator 
 {
-    public static float[,] GenerateFollofMap(int size)
+    public static float[,] GenerateFalloffMap(int size)
     {
         float[,] map = new float[size, size];
 

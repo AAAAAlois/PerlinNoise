@@ -40,7 +40,7 @@ public class MapGenerator : MonoBehaviour
 
 	void Awake()
 	{
-		falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize);
+		//falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize+2);
 	}
 
 	public void DrawMapInEditor()
@@ -125,10 +125,13 @@ public class MapGenerator : MonoBehaviour
 	{
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize + 2, mapChunkSize + 2, seed, noiseScale, octaves, persistance, lacunarity, centre + offset, normalizeMode);
 
-		Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
-		for (int y = 0; y < mapChunkSize; y++)
+		Color[] colourMap = new Color[(mapChunkSize+2) * (mapChunkSize+2)];
+
+   
+
+		for (int y = 0; y < mapChunkSize + 2; y++)
 		{
-			for (int x = 0; x < mapChunkSize; x++)
+			for (int x = 0; x < mapChunkSize + 2; x++)
 			{
 				if (useFalloff)
 				{
@@ -164,7 +167,7 @@ public class MapGenerator : MonoBehaviour
 			octaves = 0;
 		}
 
-		falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize);
+		falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize+2);
 	}
 
 	struct MapThreadInfo<T>

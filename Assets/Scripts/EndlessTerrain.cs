@@ -7,7 +7,7 @@ public class EndlessTerrain : MonoBehaviour
 {
     static MapGenerator mapGenerator;
 
-    const float scale = 1f;
+    const float scale = 2f;
 
     const float viewerMoveThreSholdForChunkUpdate = 25f;
     const float sqrViewerMoveThreSholdForChunkUpdate = viewerMoveThreSholdForChunkUpdate * viewerMoveThreSholdForChunkUpdate;

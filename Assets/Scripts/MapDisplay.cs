@@ -18,10 +18,11 @@ public class MapDisplay : MonoBehaviour
 
     }
 
-    public void DrawMesh(MeshData meshData, Texture2D texture2D)
+    public void DrawMesh(MeshData meshData)
     {
         meshFilter.sharedMesh = meshData.CreateMesh();  //sharedMesh: maybe generate mesh outside of game
-        meshRenderer.sharedMaterial.mainTexture = texture2D;
+
+        meshFilter.transform.localScale = Vector3.one * FindObjectOfType<EndlessTerrain>().scale;
     }
 
 }

@@ -7,12 +7,12 @@ using System.Collections.Generic;
 public class MapGenerator : MonoBehaviour
 {
 
-	public enum DrawMode { NoiseMap, ColourMap, Mesh, FalloffMap };
+	public enum DrawMode { NoiseMap, Mesh, FalloffMap };
 	public DrawMode drawMode;
 
 	public Noise.NormalizeMode normalizeMode;
 
-	public const int mapChunkSize = 239;  //241-1 have many factors  239: subtract 2 border vertices
+	public int mapChunkSize = 239;  //241-1 have many factors  239: subtract 2 border vertices
 	[Range(0, 6)]
 	public int editorPreviewLOD;
 	public float noiseScale;
@@ -31,7 +31,6 @@ public class MapGenerator : MonoBehaviour
 
 	public bool autoUpdate;
 
-	public TerrainType[] regions;
 
 	float[,] falloffMap;
 
@@ -52,13 +51,9 @@ public class MapGenerator : MonoBehaviour
 		{
 			display.DrawTexture(TextureGenerator.TextureFromHeightMap(mapData.heightMap));
 		}
-		else if (drawMode == DrawMode.ColourMap)
-		{
-			display.DrawTexture(TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
-		}
 		else if (drawMode == DrawMode.Mesh)
 		{
-			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD), TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
+			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD));
 		}
 		else if (drawMode == DrawMode.FalloffMap)
 		{
@@ -125,7 +120,6 @@ public class MapGenerator : MonoBehaviour
 	{
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize + 2, mapChunkSize + 2, seed, noiseScale, octaves, persistance, lacunarity, centre + offset, normalizeMode);
 
-		Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
 		for (int y = 0; y < mapChunkSize; y++)
 		{
 			for (int x = 0; x < mapChunkSize; x++)
@@ -134,23 +128,12 @@ public class MapGenerator : MonoBehaviour
 				{
 					noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
 				}
-				float currentHeight = noiseMap[x, y];
-				for (int i = 0; i < regions.Length; i++)
-				{
-					if (currentHeight >= regions[i].height)
-					{
-						colourMap[y * mapChunkSize + x] = regions[i].color;
-					}
-					else
-					{
-						break;
-					}
-				}
+				
 			}
 		}
 
 
-		return new MapData(noiseMap, colourMap);
+		return new MapData(noiseMap);
 	}
 
 	void OnValidate()
@@ -183,21 +166,16 @@ public class MapGenerator : MonoBehaviour
 }
 
 [System.Serializable]
-public struct TerrainType
-{
-	public string name;
-	public float height;
-	public Color color;
-}
+
 
 public struct MapData
 {
 	public readonly float[,] heightMap;
-	public readonly Color[] colorMap;
 
-	public MapData(float[,] heightMap, Color[] colorMap)
+
+	public MapData(float[,] heightMap)
 	{
 		this.heightMap = heightMap;
-		this.colorMap = colorMap;
+
 	}
 }

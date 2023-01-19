@@ -7,7 +7,7 @@ public class EndlessTerrain : MonoBehaviour
 {
     static MapGenerator mapGenerator;
 
-    const float scale = 1f;
+    public float scale = 1f;
 
     const float viewerMoveThreSholdForChunkUpdate = 25f;
     const float sqrViewerMoveThreSholdForChunkUpdate = viewerMoveThreSholdForChunkUpdate * viewerMoveThreSholdForChunkUpdate;
@@ -31,7 +31,7 @@ public class EndlessTerrain : MonoBehaviour
         mapGenerator = FindObjectOfType<MapGenerator>();
 
         maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
-        chunkSize = MapGenerator.mapChunkSize - 1;
+        chunkSize = mapGenerator.mapChunkSize - 1;
         chunkVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
 
         UpdateVisibleChunks();
@@ -114,9 +114,9 @@ public class EndlessTerrain : MonoBehaviour
             meshCollider = meshObject.AddComponent<MeshCollider>();
             meshRenderer.material = material;
 
-            meshObject.transform.position = positionV3 * scale;
+            meshObject.transform.position = positionV3 * FindObjectOfType<EndlessTerrain>().scale;
             meshObject.transform.parent = parent;
-            meshObject.transform.localScale = Vector3.one * scale;
+            meshObject.transform.localScale = Vector3.one * FindObjectOfType<EndlessTerrain>().scale;
             SetVisible(false);
 
             for(int i = 0; i < detailLevels.Length; i++)
@@ -135,9 +135,6 @@ public class EndlessTerrain : MonoBehaviour
         {
             this.mapData = mapData;
             mapDataReceived = true;
-
-            Texture2D texture = TextureGenerator.TextureFromColorMap(mapData.colorMap, MapGenerator.mapChunkSize, MapGenerator.mapChunkSize);
-            meshRenderer.material.mainTexture = texture;
 
             UpdateTerrainChunk();
         }

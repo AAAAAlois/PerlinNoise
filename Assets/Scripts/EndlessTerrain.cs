@@ -67,21 +67,42 @@ public class EndlessTerrain : MonoBehaviour
 
     public void UpdateVisibleChunks()
     {
+
         if (parameterChange)
         {
             foreach (TerrainChunk chunk in terrainChunkDictionary.Values)
             {
-                //Destroy(chunk.meshObject);
-                //chunk.meshObject = null;
+                Destroy(chunk.meshObject);
+                chunk.meshObject = null;
 
-                MeshData meshData = MeshGenerator.GenerateTerrainMesh(chunk.mapData.heightMap, mapGenerator.meshHeightMultiplier, mapGenerator.meshHeightCurve, 0);
-                chunk.meshObject.GetComponent<MeshFilter>().mesh = meshData.CreateMesh();
             }
             terrainChunkDictionary.Clear();
             terrainChunksVisibleLastUpdate.Clear();
 
+            int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
+            int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / chunkSize);
 
-           
+            for (int yOffset = -chunkVisibleInViewDst; yOffset <= chunkVisibleInViewDst; yOffset++)
+            {
+                for (int xOffset = -chunkVisibleInViewDst; xOffset <= chunkVisibleInViewDst; xOffset++)
+                {
+                    Vector2 viewdChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+
+                    if (terrainChunkDictionary.ContainsKey(viewdChunkCoord))
+                    {
+                        terrainChunkDictionary[viewdChunkCoord].UpdateTerrainChunk();
+
+                    }
+                    else
+                    {
+                        terrainChunkDictionary.Add(viewdChunkCoord, new TerrainChunk(viewdChunkCoord, chunkSize, detailLevels, transform, mapMaterial));
+                    }
+                }
+
+            }
+
+
+
         }
  
 
@@ -194,7 +215,11 @@ public class EndlessTerrain : MonoBehaviour
             mapDataReceived = true;
 
             Texture2D texture = TextureGenerator.TextureFromColorMap(mapData.colorMap, MapGenerator.mapChunkSize, MapGenerator.mapChunkSize);
-            meshRenderer.material.mainTexture = texture;
+
+            if (meshObject!=null)
+            {
+                meshRenderer.material.mainTexture = texture;
+            }
 
             UpdateTerrainChunk();
         }
@@ -233,7 +258,11 @@ public class EndlessTerrain : MonoBehaviour
                         if (lodMesh.hasMesh)
                         {
                             previousLODIndex = lodIndex;
-                            meshFilter.mesh = lodMesh.mesh;
+
+                            if (meshObject != null)
+                            {
+                                meshFilter.mesh = lodMesh.mesh;
+                            }
                         }
                         else if (!lodMesh.hasRequestedMesh)
                         {
@@ -244,7 +273,7 @@ public class EndlessTerrain : MonoBehaviour
 
                     if (lodIndex == 0)
                     {
-                        if (collisionLodMesh.hasMesh)
+                        if (collisionLodMesh.hasMesh && meshObject != null)
                         {
                             meshCollider.sharedMesh = collisionLodMesh.mesh;
                         }
@@ -264,12 +293,24 @@ public class EndlessTerrain : MonoBehaviour
 
         public void SetVisible(bool visible)
         {
-            meshObject.SetActive(visible);
+            if (meshObject != null)
+            {
+                meshObject.SetActive(visible);
+            }
+
         }
 
         public bool isVisible()
         {
-            return meshObject.activeSelf;
+            if (meshObject != null)
+            {
+                return meshObject.activeSelf;
+            }
+            else
+            {
+                return false;
+            }
+
         }
     }
 

@@ -6,6 +6,7 @@ public class BigMap : MonoBehaviour
 {
     public const float maxViewDst = 450;
     public Transform viewer;
+    public int chunkNum;
 
     public static Vector2 viewerPosition;
     int chunkSize;

@@ -102,8 +102,6 @@ public class MidpointCustomTerrian : MonoBehaviour
             plantsLastFrame = Plants.value;
             PlantTree();
         }
-
-        ChooseWays.onValueChanged.AddListener(ChooseWaysF);
     }
     void ChooseWaysF(int i)
     {
@@ -154,6 +152,7 @@ public class MidpointCustomTerrian : MonoBehaviour
         Smooth.onClick.AddListener(SmoothF);
         Convert2Mesh.onClick.AddListener(Convert2MeshF);
         Convert2Terrain.onClick.AddListener(Convert2TerrainF);
+        ChooseWays.onValueChanged.AddListener(ChooseWaysF);
     }
     void Convert2MeshF()
     {

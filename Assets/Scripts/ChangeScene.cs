@@ -10,23 +10,19 @@ public class ChangeScene : MonoBehaviour
 {
     public Dropdown dropdown;
 
-
-    private void Start()
+    private void OnEnable()
     {
-        //dropdown = GetComponent<Dropdown>();
-        dropdown.onValueChanged.AddListener(delegate { DropdownItemSelected(dropdown); });
+        dropdown.onValueChanged.AddListener(changeScene);
     }
-
-    private void DropdownItemSelected(Dropdown dropdown)
-    {
-        //SceneManager.LoadScene((int)dropdown.value);
-        Debug.Log(dropdown.value);
-    }
-
-    public void loadPerlin()
-    {
-        SceneManager.LoadScene(1);
-    }
-
     
+    void changeScene(int i)
+    {
+        switch (i)
+        {
+            case 0:
+                SceneManager.LoadScene(0);
+                break;
+            case 1:break;
+        }
+    }
 }

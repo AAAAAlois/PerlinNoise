@@ -192,6 +192,7 @@ public class MeshData
     {
         bakedNormals = CalculateNormals();
     }
+
     public Mesh CreateMesh()
     {
         Mesh mesh = new Mesh();

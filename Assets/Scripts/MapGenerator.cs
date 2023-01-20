@@ -42,6 +42,14 @@ public class MapGenerator : MonoBehaviour
 	[HideInInspector] public float lastFramePersistance;
 	[HideInInspector] public float lastFrameLacunarity;
 	[HideInInspector] public float lastFrameHeightMultiplier;
+	[HideInInspector] public float lastFrameNoiseScale;
+	[HideInInspector] public Vector2 lastFrameOffset;
+	[HideInInspector] public int lastFrameSeed;
+	[HideInInspector] public bool lastFrameUseFalloff;
+
+	[HideInInspector] public bool isEndlessTerrain = false;
+
+
 
 	Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
@@ -136,7 +144,27 @@ public class MapGenerator : MonoBehaviour
 			}
 		}
 
-        
+        if (!isEndlessTerrain)
+        {
+			if (lastFrameOctaves != octaves || lastFramePersistance != persistance || lastFrameLacunarity != lacunarity || lastFrameHeightMultiplier != meshHeightMultiplier
+			|| lastFrameNoiseScale != noiseScale || lastFrameOffset != offset || lastFrameSeed != seed || lastFrameUseFalloff != useFalloff)
+			{
+
+				lastFrameOctaves = octaves;
+				lastFramePersistance = persistance;
+				lastFrameLacunarity = lacunarity;
+				lastFrameHeightMultiplier = meshHeightMultiplier;
+				lastFrameNoiseScale = noiseScale;
+				lastFrameOffset = offset;
+				lastFrameSeed = seed;
+				lastFrameUseFalloff = useFalloff;
+
+				DrawMapInEditor();
+
+			}
+		}
+		
+
 	}
 
 	MapData GenerateMapData(Vector2 centre)

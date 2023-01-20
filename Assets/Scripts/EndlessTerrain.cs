@@ -6,6 +6,7 @@ using UnityEngine;
 public class EndlessTerrain : MonoBehaviour
 {
     static MapGenerator mapGenerator;
+    static HUD hud;
 
     const float scale = 2f;
 
@@ -15,7 +16,13 @@ public class EndlessTerrain : MonoBehaviour
     public static float maxViewDst;
     public LODInfo[] detailLevels;
 
-    public Transform viewer;
+    Transform viewer;
+    public Transform cameraViewer;
+    public Transform fpsViewer;
+    public Transform tpsViewer;
+    [HideInInspector] public bool isFpsViewer = false;
+    [HideInInspector] public bool isTpsViewer = false;
+
     public Material mapMaterial;
 
     public static Vector2 viewerPosition;
@@ -28,41 +35,104 @@ public class EndlessTerrain : MonoBehaviour
 
     bool positionChange = false;
     bool parameterChange = false;
+    bool isEndlessTerrainChanged = false;
 
     private void Start()
     {
         mapGenerator = FindObjectOfType<MapGenerator>();
+        hud = FindObjectOfType<HUD>();
 
         maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
         chunkSize = MapGenerator.mapChunkSize - 1;
         chunkVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
 
         JustUpdateChunk();
+
+        ChangeViewer();
     }
 
     private void Update()
     {
+        ChangeViewer();
         viewerPosition = new Vector2(viewer.position.x, viewer.position.z)/ scale;
 
-        if ((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveThreSholdForChunkUpdate)
+        if (mapGenerator.isEndlessTerrain)
         {
-            positionChange = true;
-            viewerPositionOld = viewerPosition;
-            UpdateVisibleChunks();
+            if ((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveThreSholdForChunkUpdate)
+            {
+                positionChange = true;
+                viewerPositionOld = viewerPosition;
+                UpdateVisibleChunks();
+            }
+
+            if (mapGenerator.lastFrameOctaves != mapGenerator.octaves || mapGenerator.lastFramePersistance != mapGenerator.persistance || mapGenerator.lastFrameLacunarity != mapGenerator.lacunarity || mapGenerator.lastFrameHeightMultiplier != mapGenerator.meshHeightMultiplier
+                || mapGenerator.lastFrameNoiseScale != mapGenerator.noiseScale || mapGenerator.lastFrameOffset != mapGenerator.offset || mapGenerator.lastFrameSeed != mapGenerator.seed || mapGenerator.lastFrameUseFalloff != mapGenerator.useFalloff || mapGenerator.lastFrameEditorPreviewLOD != mapGenerator.editorPreviewLOD)
+            {
+                parameterChange = true;
+
+                mapGenerator.lastFrameOctaves = mapGenerator.octaves;
+                mapGenerator.lastFramePersistance = mapGenerator.persistance;
+                mapGenerator.lastFrameLacunarity = mapGenerator.lacunarity;
+                mapGenerator.lastFrameHeightMultiplier = mapGenerator.meshHeightMultiplier;
+                mapGenerator.lastFrameNoiseScale = mapGenerator.noiseScale;
+                mapGenerator.lastFrameOffset = mapGenerator.offset;
+                mapGenerator.lastFrameSeed = mapGenerator.seed;
+                mapGenerator.lastFrameEditorPreviewLOD = mapGenerator.editorPreviewLOD;
+                mapGenerator.lastFrameUseFalloff = mapGenerator.useFalloff;
+                //Debug.Log("update chunks");
+                UpdateVisibleChunks();
+            }
         }
 
-        if (mapGenerator.lastFrameOctaves != mapGenerator.octaves || mapGenerator.lastFramePersistance != mapGenerator.persistance || mapGenerator.lastFrameLacunarity != mapGenerator.lacunarity || mapGenerator.lastFrameHeightMultiplier != mapGenerator.meshHeightMultiplier)
-        {
-            parameterChange = true;
 
-            mapGenerator.lastFrameOctaves = mapGenerator.octaves;
-            mapGenerator.lastFramePersistance = mapGenerator.persistance;
-            mapGenerator.lastFrameLacunarity = mapGenerator.lacunarity;
-            mapGenerator.lastFrameHeightMultiplier = mapGenerator.meshHeightMultiplier;
-            //Debug.Log("update chunks");
-            UpdateVisibleChunks();
+
+
+        if (!mapGenerator.isEndlessTerrain && !isEndlessTerrainChanged)
+        {
+            isEndlessTerrainChanged = true;
+            Debug.Log("isEndlessTerrainHide");
+            foreach (TerrainChunk chunk in terrainChunkDictionary.Values)
+            {
+                Destroy(chunk.meshObject);
+                chunk.meshObject = null;
+            }
+            terrainChunkDictionary.Clear();
+            terrainChunksVisibleLastUpdate.Clear();
+        }
+        else if (mapGenerator.isEndlessTerrain)
+        {
+            isEndlessTerrainChanged = false;
         }
 
+    }
+
+    void ChangeViewer()
+    {
+        if (!isTpsViewer && !isFpsViewer)
+        {
+            viewer = cameraViewer;
+            fpsViewer.parent.gameObject.SetActive(false);
+            tpsViewer.parent.gameObject.SetActive(false);
+
+
+
+        }
+
+        if (isFpsViewer && !isTpsViewer)
+        {
+            viewer = fpsViewer;
+            fpsViewer.parent.gameObject.SetActive(true);
+            tpsViewer.parent.gameObject.SetActive(false);
+
+        }
+
+        if (isTpsViewer)
+        {
+            viewer = tpsViewer;           
+            fpsViewer.parent.gameObject.SetActive(false);
+            tpsViewer.parent.gameObject.SetActive(true);
+
+        }
     }
 
     public void UpdateVisibleChunks()
@@ -70,6 +140,8 @@ public class EndlessTerrain : MonoBehaviour
 
         if (parameterChange)
         {
+            Debug.Log("new chunks");
+
             foreach (TerrainChunk chunk in terrainChunkDictionary.Values)
             {
                 Destroy(chunk.meshObject);
@@ -84,11 +156,15 @@ public class EndlessTerrain : MonoBehaviour
 
             JustUpdateChunk();
 
+            parameterChange = false;
+
         }
 
 
         if (positionChange)
         {
+            Debug.Log("update chunks");
+
             for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++)
             {
                 terrainChunksVisibleLastUpdate[i].SetVisible(false);
@@ -96,12 +172,14 @@ public class EndlessTerrain : MonoBehaviour
             terrainChunksVisibleLastUpdate.Clear();
 
             JustUpdateChunk();
+
+            positionChange = false;
         }
 
        
     }
 
-    void JustUpdateChunk()
+    public void JustUpdateChunk()
     {
         int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
         int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / chunkSize);

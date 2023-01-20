@@ -6,7 +6,8 @@ using TMPro;
 
 public class HUD : MonoBehaviour
 {
-    [SerializeField] MapGenerator mapGenerator;
+    static MapGenerator mapGenerator;
+    static EndlessTerrain endlessTerrain;
 
     [Header("Slider")]
     [SerializeField] Slider octavesSlider;
@@ -17,6 +18,7 @@ public class HUD : MonoBehaviour
     [SerializeField] Slider offsetXSlider;
     [SerializeField] Slider offsetYSlider;
     [SerializeField] Slider seedSlider;
+    [SerializeField] Slider lodSlider;
 
     [Header("Value")]
     [SerializeField] TextMeshProUGUI octavesValue;
@@ -27,6 +29,7 @@ public class HUD : MonoBehaviour
     [SerializeField] TextMeshProUGUI offsetXValue;
     [SerializeField] TextMeshProUGUI offsetYValue;
     [SerializeField] TextMeshProUGUI seedValue;
+    [SerializeField] TextMeshProUGUI lodValue;
 
     [Header("Toggle")]
     [SerializeField] Toggle toggleIslandTerrain;
@@ -34,10 +37,17 @@ public class HUD : MonoBehaviour
     [SerializeField] GameObject singleChunk;
     [SerializeField] Toggle toggleTPS;
 
+    
+
+
+
 
 
     void Start()
     {
+        mapGenerator = FindObjectOfType<MapGenerator>();
+        endlessTerrain = FindObjectOfType<EndlessTerrain>();
+
         octavesSlider.onValueChanged.AddListener(delegate { 
             mapGenerator.octaves = (int)octavesSlider.value;
             octavesValue.text = octavesSlider.value.ToString();
@@ -78,8 +88,14 @@ public class HUD : MonoBehaviour
             seedValue.text = seedSlider.value.ToString();
         });
 
+        lodSlider.onValueChanged.AddListener(delegate {
+            mapGenerator.editorPreviewLOD = (int)lodSlider.value;
+            lodValue.text = lodSlider.value.ToString();
+        });
+
         toggleIslandTerrain.onValueChanged.AddListener(isOn => mapGenerator.useFalloff = isOn) ;
         toggleEndlessTerrain.onValueChanged.AddListener(isOn => EndlessTerrainToggle(isOn));
+        toggleTPS.onValueChanged.AddListener(isOn => TpsToggle(isOn));
 
     }
 
@@ -94,9 +110,20 @@ public class HUD : MonoBehaviour
 
     void EndlessTerrainToggle(bool isOn)
     {
-        mapGenerator.gameObject.GetComponent<EndlessTerrain>().enabled = isOn;
+        if (isOn)
+        {
+            endlessTerrain.JustUpdateChunk();
+        }
+
         mapGenerator.isEndlessTerrain = isOn;
         singleChunk.SetActive(!isOn);
-       
+        endlessTerrain.isFpsViewer = isOn;
+     
+    }
+
+    void TpsToggle(bool isOn)
+    {
+        endlessTerrain.isTpsViewer = isOn;
+        endlessTerrain.tpsViewer.parent.transform.position = new Vector3(0f, 100f, 0f);
     }
 }

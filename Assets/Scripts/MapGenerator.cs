@@ -68,6 +68,7 @@ public class MapGenerator : MonoBehaviour
 	[HideInInspector] public float lastFrameNoiseScale;
 	[HideInInspector] public Vector2 lastFrameOffset;
 	[HideInInspector] public int lastFrameSeed;
+	[HideInInspector] public int lastFrameEditorPreviewLOD;
 	[HideInInspector] public bool lastFrameUseFalloff;
 
 	[HideInInspector] public bool isEndlessTerrain = false;
@@ -171,7 +172,7 @@ public class MapGenerator : MonoBehaviour
         if (!isEndlessTerrain)
         {
 			if (lastFrameOctaves != octaves || lastFramePersistance != persistance || lastFrameLacunarity != lacunarity || lastFrameHeightMultiplier != meshHeightMultiplier
-			|| lastFrameNoiseScale != noiseScale || lastFrameOffset != offset || lastFrameSeed != seed || lastFrameUseFalloff != useFalloff)
+			|| lastFrameNoiseScale != noiseScale || lastFrameOffset != offset || lastFrameSeed != seed || lastFrameUseFalloff != useFalloff || lastFrameEditorPreviewLOD != editorPreviewLOD)
 			{
 
 				lastFrameOctaves = octaves;
@@ -182,6 +183,7 @@ public class MapGenerator : MonoBehaviour
 				lastFrameOffset = offset;
 				lastFrameSeed = seed;
 				lastFrameUseFalloff = useFalloff;
+				lastFrameEditorPreviewLOD = editorPreviewLOD;
 
 				DrawMapInEditor();
 

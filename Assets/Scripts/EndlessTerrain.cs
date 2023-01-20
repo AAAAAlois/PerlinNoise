@@ -39,7 +39,7 @@ public class EndlessTerrain : MonoBehaviour
 
     private void Start()
     {
-        mapGenerator = FindObjectOfType<MapGenerator>();
+        mapGenerator = GetComponent<MapGenerator>();
         hud = FindObjectOfType<HUD>();
 
         maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;

@@ -989,7 +989,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1668976705}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.2
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6404,7 +6404,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Option A
+  m_Text: Diamond-Square
 --- !u!222 &1244636654
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7489,13 +7489,11 @@ MonoBehaviour:
   sandS: {fileID: 110269682}
   groundS: {fileID: 1189665308}
   snowS: {fileID: 797496146}
-  TerrainHeight: {fileID: 0}
   tree: {fileID: 114418, guid: be878d9ea17907f4a8068678a5ce7908, type: 3}
   tree1: {fileID: 114418, guid: 8b2d47fdc2e25ac4f9721480a68bbefa, type: 3}
   tree2: {fileID: 114418, guid: 9b8fc966f95ea9c4194dc091fc40b478, type: 3}
   plantsList: []
   convert: {fileID: 1405038940}
-  TerrainNum: {fileID: 0}
 --- !u!114 &1405038942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9968,11 +9966,9 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Option A
+    - m_Text: Diamond-Square
       m_Image: {fileID: 0}
-    - m_Text: Option B
-      m_Image: {fileID: 0}
-    - m_Text: Option C
+    - m_Text: Perlin Noise
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:

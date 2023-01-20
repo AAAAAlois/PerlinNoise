@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MidpointCustomTerrian : MonoBehaviour
@@ -100,6 +101,19 @@ public class MidpointCustomTerrian : MonoBehaviour
         {
             plantsLastFrame = Plants.value;
             PlantTree();
+        }
+
+        ChooseWays.onValueChanged.AddListener(ChooseWaysF);
+    }
+    void ChooseWaysF(int i)
+    {
+        switch (i)
+        {
+            case 0:
+                break;
+            case 1:
+                SceneManager.LoadScene(1);
+                break;
         }
     }
 

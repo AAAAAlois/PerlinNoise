@@ -174,6 +174,7 @@ public class MapGenerator : MonoBehaviour
 			if (lastFrameOctaves != octaves || lastFramePersistance != persistance || lastFrameLacunarity != lacunarity || lastFrameHeightMultiplier != meshHeightMultiplier
 			|| lastFrameNoiseScale != noiseScale || lastFrameOffset != offset || lastFrameSeed != seed || lastFrameUseFalloff != useFalloff || lastFrameEditorPreviewLOD != editorPreviewLOD)
 			{
+				
 
 				lastFrameOctaves = octaves;
 				lastFramePersistance = persistance;

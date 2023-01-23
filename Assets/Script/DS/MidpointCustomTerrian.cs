@@ -55,10 +55,10 @@ public class MidpointCustomTerrian : MonoBehaviour
         HeightMinS.minValue = -10f;
         HeightMaxS.maxValue = 10f;
         HeightMaxS.minValue = 0f;
-        HeightDampenerS.maxValue = 10f;
-        HeightDampenerS.minValue = 0f;
-        RoughnessS.maxValue = 10f;
-        RoughnessS.minValue = 0f;
+        HeightDampenerS.maxValue = 3f;
+        HeightDampenerS.minValue = 1f;
+        RoughnessS.maxValue = 5f;
+        RoughnessS.minValue = 1f;
         SmoothS.maxValue = 10f;
         SmoothS.minValue = 0f;
         Plants.maxValue = 300;
@@ -314,9 +314,9 @@ public class MidpointCustomTerrian : MonoBehaviour
             }
             #endregion
             #region Square Step
-            for(int x = 0; x < width;x+= squareSize)
+            for (int x = 0; x < width; x += squareSize)
             {
-                for (int y=0;y<width;y+= squareSize)
+                for (int y = 0; y < width; y += squareSize)
                 {
                     cornerX = x + squareSize;
                     cornerY = y + squareSize;
@@ -326,14 +326,51 @@ public class MidpointCustomTerrian : MonoBehaviour
                     midXR = (int)(midX + squareSize);
                     midYD = (int)(midY - squareSize);
                     midYU = (int)(midY + squareSize);
-                    if(midXL <=0||midYD <=0||midXR >=width -1||midYU >=width -1)
+
+                    if (midXL <= 0 || midYD <= 0 || midXR >= width - 1 || midYU >= width - 1)
                     {
                         continue;
                     }
-                    heightMap[midX, y] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midX, midYD] + heightMap[cornerX, y]) / 4.0f + Random.Range(heightMin, heightMax));
-                    heightMap[cornerX, midY] = (float)((heightMap[midX, midY] + heightMap[cornerX, y] + heightMap[midXR, midY] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
-                    heightMap[midX, cornerY] = (float)((heightMap[midX, midY] + heightMap[x, cornerY] + heightMap[midX, midYU] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
-                    heightMap[x, midY] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midXL, midY] + heightMap[x, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                    else
+                    {
+                        heightMap[midX, y] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midX, midYD] + heightMap[cornerX, y]) / 4.0f + Random.Range(heightMin, heightMax));
+                        heightMap[cornerX, midY] = (float)((heightMap[midX, midY] + heightMap[cornerX, y] + heightMap[midXR, midY] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                        heightMap[midX, cornerY] = (float)((heightMap[midX, midY] + heightMap[x, cornerY] + heightMap[midX, midYU] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                        heightMap[x, midY] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midXL, midY] + heightMap[x, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                    }
+
+                    //if (midXL <= 0)
+                    //{
+                    //    heightMap[x, midY] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[x, cornerY]) / 3.0f + Random.Range(heightMin, heightMax));
+                    //}
+                    //else
+                    //{
+                    //    heightMap[x, midY] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midXL, midY] + heightMap[x, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                    //}
+                    //if (midYD <= 0)
+                    //{
+                    //    heightMap[midX, y] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[cornerX, y]) / 3.0f + Random.Range(heightMin, heightMax));
+                    //}
+                    //else
+                    //{
+                    //    heightMap[midX, y] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midX, midYD] + heightMap[cornerX, y]) / 4.0f + Random.Range(heightMin, heightMax));
+                    //}
+                    //if (midYU >= width - 1)
+                    //{
+                    //    heightMap[midX, cornerY] = (float)((heightMap[midX, midY] + heightMap[x, cornerY] + heightMap[cornerX, cornerY]) / 3.0f + Random.Range(heightMin, heightMax));
+                    //}
+                    //else
+                    //{
+                    //    heightMap[midX, cornerY] = (float)((heightMap[midX, midY] + heightMap[x, cornerY] + heightMap[midX, midYU] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                    //}
+                    //if (midXR >= width - 1)
+                    //{
+                    //    heightMap[cornerX, midY] = (float)((heightMap[midX, midY] + heightMap[cornerX, y] + heightMap[cornerX, cornerY]) / 3.0f + Random.Range(heightMin, heightMax));
+                    //}
+                    //else
+                    //{
+                    //    heightMap[cornerX, midY] = (float)((heightMap[midX, midY] + heightMap[cornerX, y] + heightMap[midXR, midY] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                    //}
                 }
             }
             #endregion
@@ -384,7 +421,7 @@ public class MidpointCustomTerrian : MonoBehaviour
         }
         foreach (var item in plantsList)
         {
-            if (item.transform.position.y < sandS.value * 0.9 || item.transform.position.y > 1000)
+            if (item.transform.position.y < sandS.value * 0.9 || item.transform.position.y > groundS .value)
             {
                 Destroy(item);
             }

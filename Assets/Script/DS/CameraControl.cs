@@ -24,7 +24,7 @@ public class CameraControl : MonoBehaviour
             transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
         }
 
-        if (Input.GetKey(KeyCode.S)&&transform .position .z>-395)
+        if (Input.GetKey(KeyCode.S))
         {
             transform.Translate(Vector3.back * moveSpeed * Time.deltaTime);
         }
@@ -34,7 +34,7 @@ public class CameraControl : MonoBehaviour
             transform.Translate(Vector3.up * moveSpeed * Time.deltaTime);
         }
 
-        if (Input.GetKey(KeyCode.LeftControl)&&transform .position .y>271)
+        if (Input.GetKey(KeyCode.LeftControl))
         {
             transform.Translate(Vector3.down * moveSpeed * Time.deltaTime);
         }

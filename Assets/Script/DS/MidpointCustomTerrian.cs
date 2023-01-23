@@ -55,7 +55,7 @@ public class MidpointCustomTerrian : MonoBehaviour
         HeightMinS.minValue = -10f;
         HeightMaxS.maxValue = 10f;
         HeightMaxS.minValue = 0f;
-        HeightDampenerS.maxValue = 3f;
+        HeightDampenerS.maxValue = 2f;
         HeightDampenerS.minValue = 1f;
         RoughnessS.maxValue = 5f;
         RoughnessS.minValue = 1f;
@@ -331,13 +331,11 @@ public class MidpointCustomTerrian : MonoBehaviour
                     {
                         continue;
                     }
-                    else
-                    {
-                        heightMap[midX, y] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midX, midYD] + heightMap[cornerX, y]) / 4.0f + Random.Range(heightMin, heightMax));
-                        heightMap[cornerX, midY] = (float)((heightMap[midX, midY] + heightMap[cornerX, y] + heightMap[midXR, midY] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
-                        heightMap[midX, cornerY] = (float)((heightMap[midX, midY] + heightMap[x, cornerY] + heightMap[midX, midYU] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
-                        heightMap[x, midY] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midXL, midY] + heightMap[x, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
-                    }
+
+                    heightMap[midX, y] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midX, midYD] + heightMap[cornerX, y]) / 4.0f + Random.Range(heightMin, heightMax));
+                    heightMap[cornerX, midY] = (float)((heightMap[midX, midY] + heightMap[cornerX, y] + heightMap[midXR, midY] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                    heightMap[midX, cornerY] = (float)((heightMap[midX, midY] + heightMap[x, cornerY] + heightMap[midX, midYU] + heightMap[cornerX, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
+                    heightMap[x, midY] = (float)((heightMap[midX, midY] + heightMap[x, y] + heightMap[midXL, midY] + heightMap[x, cornerY]) / 4.0f + Random.Range(heightMin, heightMax));
 
                     //if (midXL <= 0)
                     //{

@@ -70,7 +70,6 @@ public class EndlessTerrain : MonoBehaviour
             {
                 parameterChange = true;
 
-                
                 mapGenerator.lastFrameOctaves = mapGenerator.octaves;
                 mapGenerator.lastFramePersistance = mapGenerator.persistance;
                 mapGenerator.lastFrameLacunarity = mapGenerator.lacunarity;
